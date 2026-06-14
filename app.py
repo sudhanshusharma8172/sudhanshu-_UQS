@@ -7,12 +7,20 @@ from university documents using FAISS + Sentence Transformers + Gemini API.
 """
 
 import os
+import logging
 from pathlib import Path
 
 from flask import Flask, request, jsonify, render_template
 from dotenv import load_dotenv
 from rag_engine import build_index, search_chunks
 import google.generativeai as genai
+
+# Configure production logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="[%(asctime)s] %(levelname)s in %(module)s: %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -23,8 +31,11 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 # ── Configure Gemini ───────────────────────────────────────────────────────
 model = None
 if GEMINI_API_KEY:
+    logger.info("GEMINI_API_KEY loaded. Configuring GenerativeAI model...")
     genai.configure(api_key=GEMINI_API_KEY)
     model = genai.GenerativeModel("gemini-2.5-flash")
+else:
+    logger.warning("GEMINI_API_KEY is missing. Generative AI queries will fail.")
 
 # ── Initialize Flask App ───────────────────────────────────────────────────
 app = Flask(__name__)
@@ -40,17 +51,26 @@ def load_knowledge_index():
     try:
         data_path = BASE_DIR / "university_info.txt"
         if not data_path.exists():
-            print(f"CRITICAL: {data_path} not found.")
+            logger.error(f"CRITICAL: {data_path} not found.")
             return False
         
         chunks, index, embed_model = build_index(str(data_path))
-        print("Knowledge base index loaded and built successfully!")
+        logger.info("Knowledge base index loaded and built successfully!")
         return True
     except Exception as e:
-        print(f"CRITICAL: Failed to build knowledge base index: {e}")
+        logger.error(f"CRITICAL: Failed to build knowledge base index: {e}")
         return False
 
 # ── Routes ─────────────────────────────────────────────────────────────────
+
+@app.route("/health")
+def health_route():
+    """Health check endpoint for deployment monitoring."""
+    if not chunks or not index or not embed_model:
+        return jsonify({"status": "initializing", "message": "Knowledge base index is still building."}), 503
+    if not GEMINI_API_KEY:
+        return jsonify({"status": "degraded", "message": "GEMINI_API_KEY is missing."}), 200
+    return jsonify({"status": "healthy"}), 200
 
 @app.route("/")
 def index_route():
@@ -64,7 +84,7 @@ def query_route():
     Expects JSON payload: { "question": "..." }
     """
     if not GEMINI_API_KEY:
-        return jsonify({"error": "GEMINI_API_KEY missing in .env file."}), 500
+        return jsonify({"error": "GEMINI_API_KEY environment variable is not configured on the server."}), 500
 
     # Parse request JSON data
     data = request.get_json() or {}
@@ -117,5 +137,5 @@ load_knowledge_index()
 if __name__ == "__main__":
     # Get port from environment variable (default to 5000 for local development)
     port = int(os.environ.get("PORT", 5000))
-    # Run the Flask development server on 0.0.0.0
-    app.run(host="0.0.0.0", port=port, debug=True)
+    # debug=False for production safety; set to True only for local development
+    app.run(host="0.0.0.0", port=port, debug=False)

@@ -1,4 +1,29 @@
+# ── Secrets ────────────────────────────────────────────────────────────────
 .env
+
+# ── Python cache ───────────────────────────────────────────────────────────
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+
+# ── Virtual environments ────────────────────────────────────────────────────
+venv/
+.venv/
+env/
+
+# ── Local model cache (downloaded at build time on Render) ─────────────────
+models/
+
+# ── Editor / IDE ────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ── OS files ────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Legacy Streamlit config (unused) ────────────────────────────────────────
 .streamlit/

@@ -9,11 +9,15 @@ Core RAG logic:
   5. Given a query, find the most relevant chunks
 """
 
+import os
+import logging
 from pathlib import Path
 
 import numpy as np
 import faiss
 from sentence_transformers import SentenceTransformer
+
+logger = logging.getLogger(__name__)
 
 
 # ── Step 1 & 2: Load and chunk the document ────────────────────────────────
@@ -76,22 +80,28 @@ def build_index(filepath: str | Path):
       Load file → chunk → embed → FAISS index
     Returns (chunks, faiss_index, embed_model) so the app can reuse them.
     """
-    print("Loading sentence transformer model…")
-    # 'all-MiniLM-L6-v2' is small (80 MB), fast, and works well for semantic search
-    embed_model = SentenceTransformer("all-MiniLM-L6-v2")
+    base_dir = Path(__file__).resolve().parent
+    local_model_path = base_dir / "models" / "all-MiniLM-L6-v2"
 
-    print("Loading and chunking document…")
+    if local_model_path.exists() and any(local_model_path.iterdir()):
+        logger.info("Loading sentence transformer model from local cache...")
+        embed_model = SentenceTransformer(str(local_model_path))
+    else:
+        logger.info("Local model cache not found. Loading sentence transformer model from online HuggingFace Hub...")
+        embed_model = SentenceTransformer("all-MiniLM-L6-v2")
+
+    logger.info("Loading and chunking document...")
     chunks = load_and_chunk(filepath)
 
-    print(f"  → {len(chunks)} chunks created")
+    logger.info(f"  → {len(chunks)} chunks created")
 
-    print("Generating embeddings…")
+    logger.info("Generating embeddings...")
     embeddings = get_embeddings(chunks, embed_model)
 
-    print("Building FAISS index…")
+    logger.info("Building FAISS index...")
     index = build_faiss_index(embeddings)
 
-    print("Index ready!")
+    logger.info("Index ready!")
     return chunks, index, embed_model
 
 

@@ -212,31 +212,58 @@ The frontend client interface:
 
 ---
 
-## 🌐 Deployment on Render
+## 🌐 Deployment & Production Configuration
 
-This project is configured for easy deployment to **Render** using a web service.
+This project is fully configured for production deployment using standard cloud hosting services (e.g. Render, AWS, Google Cloud, Fly.io, etc.) either via native Python runtimes or Docker containers.
 
-### Required Environment Variables
+### ⚡ Deployment Optimizations
 
-When creating the Web Service on Render, you must configure the following **Environment Variable**:
+1. **Build-Time Model Caching**: The SentenceTransformer model (`all-MiniLM-L6-v2`) is downloaded and saved locally into the `models/` directory during the build phase (via `download_model.py`). This prevents startup delays, reduces cold-start times, and guards against Hugging Face rate limits or network issues at runtime.
+2. **Health Check Endpoint**: A `/health` route is available. It returns `200 OK` (when the FAISS indexing is complete and the system is ready) or `503 Service Unavailable` (while the index is still building). Cloud platforms use this endpoint for readiness checks to ensure zero-downtime deployments.
+3. **Structured Logging**: Standard Python logging is configured for all backend logic, printing structured logs with timestamps and severity levels to `stdout` for compatibility with cloud logging solutions.
+
+---
+
+### 🐳 Option A: Deploying with Docker
+
+A production-optimized `Dockerfile` is provided in the repository root. It installs the GNU OpenMP library (`libgomp1`), which is required by `faiss-cpu` to prevent container runtime errors.
+
+#### Build the image locally
+```bash
+docker build -t student-query-system .
+```
+
+#### Run the container locally
+```bash
+docker run -p 10000:10000 -e GEMINI_API_KEY="your-gemini-api-key" student-query-system
+```
+Access the application at `http://localhost:10000`.
+
+---
+
+### ☁️ Option B: Deploying on Render (via Blueprint)
+
+The project includes a `render.yaml` blueprint configuration that provisions the application using Render's Native Python environment.
+
+#### Required Environment Variables
+
+Configure the following environment variables in the Render dashboard:
 
 | Variable | Value | Description |
 |---|---|---|
 | `GEMINI_API_KEY` | `AIzaSy...` | Your secret Google Gemini API key. |
 
-*Note: The `PORT` variable is automatically injected and managed by Render (defaults to `10000` inside our `render.yaml`).*
+*Note: The `PORT` variable is automatically managed by Render (defaults to `10000` in our blueprint).*
 
-### How to Deploy via Render Blueprint
-
-The project includes a `render.yaml` blueprint configuration. To deploy:
-1. Push this project to your GitHub/GitLab repository.
+#### Steps to Deploy
+1. Push this project to your GitHub or GitLab repository.
 2. In the Render Dashboard, click **New** → **Blueprint**.
-3. Connect your repository. Render will automatically read the `render.yaml` configuration and provision the service with:
-   - **Build Command**: `pip install -r requirements.txt`
+3. Connect your repository. Render automatically reads `render.yaml` and deploys the service:
+   - **Build Command**: `pip install -r requirements.txt && python download_model.py` (caching the model at build-time)
    - **Start Command**: `gunicorn app:app --workers 1 --timeout 120`
-4. Enter your `GEMINI_API_KEY` when prompted and click **Deploy**.
+4. Enter your `GEMINI_API_KEY` and click **Deploy**.
 
-### Render Free Tier Notes
-- **Memory Limit (512MB)**: To comply with Render's free tier, Gunicorn is configured with `--workers 1` to minimize RAM consumption.
-- **Startup Timeout**: The FAISS indexing and Hugging Face Sentence Transformers model downloads on the first startup. Gunicorn is configured with `--timeout 120` to ensure the server doesn't get terminated by Render's health-check timeout during this initial download.
+#### Render Free Tier Notes
+- **Memory Limit (512MB)**: To stay within free tier memory limits, Gunicorn is restricted to `--workers 1`.
+- **Pre-loaded Model**: Caching the model during the build phase ensures startup is extremely fast, avoiding the 120-second timeout Render imposes on web server boot.
 

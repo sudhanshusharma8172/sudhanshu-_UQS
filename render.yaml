@@ -2,10 +2,12 @@ services:
   - type: web
     name: student-query-system
     runtime: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app --workers 1 --timeout 120
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt && python download_model.py
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --timeout 120
     envVars:
       - key: GEMINI_API_KEY
-        sync: false
-      - key: PORT
-        value: 10000
+        sync: false          # You will paste this manually in the Render dashboard
+      - key: PYTHON_VERSION
+        value: 3.11.0
