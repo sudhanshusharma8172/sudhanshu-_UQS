@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="UniQuery is a RAG-powered student help desk. Search and ask questions about admissions, fees, exam dates, hostel rules, library timings, placements, or scholarships directly from university documents.">
+    <title>UniQuery — Student Help Desk</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- CSS Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Main Layout -->
+        <main class="main-content">
+            
+            <!-- Hero Section -->
+            <header class="hero" id="hero-section">
+                <div class="hero-eyebrow">🎓 RAG-Powered Help Desk</div>
+                <h1 class="hero-title">Student <span>University</span> Query System</h1>
+                <p class="hero-desc">
+                    Ask anything about admissions, fees, exam dates, syllabus, hostel rules,
+                    library timings, placements, or scholarships. Answers are pulled directly
+                    from official university documents.
+                </p>
+            </header>
+            
+            <!-- Workflow Steps -->
+            <section class="steps-row" aria-label="How it works">
+                <div class="step-pill">
+                    <span class="step-num">01</span>
+                    <span class="step-text">You ask a question</span>
+                </div>
+                <div class="step-pill">
+                    <span class="step-num">02</span>
+                    <span class="step-text">FAISS finds relevant text</span>
+                </div>
+                <div class="step-pill">
+                    <span class="step-num">03</span>
+                    <span class="step-text">Gemini generates the answer</span>
+                </div>
+            </section>
+            
+            <!-- Query Form Area -->
+            <section class="query-box" aria-label="Ask a question">
+                <form id="query-form" class="query-form">
+                    <label for="question-input" class="q-label">Your Question</label>
+                    <div class="input-wrapper">
+                        <input 
+                            type="text" 
+                            id="question-input" 
+                            name="question" 
+                            placeholder="e.g. What are the hostel rules? When is the last date to apply?" 
+                            required
+                            autocomplete="off"
+                        >
+                    </div>
+                    <button type="submit" id="ask-btn" class="ask-btn">
+                        <span>Ask</span>
+                        <span class="btn-arrow">→</span>
+                    </button>
+                </form>
+            </section>
+            
+            <!-- Dynamic Result Area -->
+            <section id="result-section" class="result-section" aria-live="polite">
+                <!-- Loader (hidden by default) -->
+                <div id="loader" class="loader hidden">
+                    <div class="spinner-container">
+                        <div class="pulse-ring"></div>
+                        <div class="pulse-ring delay-1"></div>
+                        <div class="spinner-core"></div>
+                    </div>
+                    <p class="loader-text">Searching documents and generating answer…</p>
+                    <div class="skeleton-container">
+                        <div class="skeleton-line skeleton-title"></div>
+                        <div class="skeleton-line skeleton-body-1"></div>
+                        <div class="skeleton-line skeleton-body-2"></div>
+                        <div class="skeleton-line skeleton-body-3"></div>
+                    </div>
+                </div>
+
+                <!-- Error Container (hidden by default) -->
+                <div id="error-card" class="error-card hidden">
+                    <span class="error-icon">⚠️</span>
+                    <span id="error-message" class="error-message"></span>
+                </div>
+
+                <!-- Answer Container (hidden by default) -->
+                <div id="answer-card" class="answer-card hidden">
+                    <div class="answer-label">Answer</div>
+                    <div id="answer-content" class="answer-content"></div>
+                </div>
+
+                <!-- Source Chunks Container (hidden by default) -->
+                <div id="sources-container" class="sources-container hidden">
+                    <button id="sources-toggle" class="sources-toggle" aria-expanded="false" aria-controls="sources-content">
+                        <span class="toggle-icon">📄</span>
+                        <span class="toggle-text">Source chunks retrieved from documents</span>
+                        <span class="chevron">▼</span>
+                    </button>
+                    <div id="sources-content" class="sources-content hidden">
+                        <div id="sources-list" class="sources-list"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>UniQuery &copy; 2026. Built with Flask, FAISS, and Gemini API.</p>
+        </footer>
+    </div>
+
+    <!-- JavaScript File -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
