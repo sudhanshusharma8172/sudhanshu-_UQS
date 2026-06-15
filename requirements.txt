@@ -6,3 +6,4 @@ python-dotenv==1.0.1
 numpy==1.26.4
 gunicorn==22.0.0
 protobuf==4.25.3
+       
