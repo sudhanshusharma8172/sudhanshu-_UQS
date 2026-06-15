@@ -3,121 +3,234 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="UniQuery is a RAG-powered student help desk. Search and ask questions about admissions, fees, exam dates, hostel rules, library timings, placements, or scholarships directly from university documents.">
-    <title>UniQuery — Student Help Desk</title>
-    
+    <meta name="description" content="UniQuery — AI-powered university help desk. Instantly get answers about admissions, fees, exam dates, hostel rules, placements, and scholarships from official university documents.">
+    <title>UniQuery — AI Student Help Desk</title>
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
     <!-- CSS Stylesheet -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <div class="app-container">
-        <!-- Main Layout -->
-        <main class="main-content">
-            
-            <!-- Hero Section -->
-            <header class="hero" id="hero-section">
-                <div class="hero-eyebrow">🎓 RAG-Powered Help Desk</div>
-                <h1 class="hero-title">Student <span>University</span> Query System</h1>
-                <p class="hero-desc">
-                    Ask anything about admissions, fees, exam dates, syllabus, hostel rules,
-                    library timings, placements, or scholarships. Answers are pulled directly
-                    from official university documents.
-                </p>
-            </header>
-            
-            <!-- Workflow Steps -->
-            <section class="steps-row" aria-label="How it works">
-                <div class="step-pill">
-                    <span class="step-num">01</span>
-                    <span class="step-text">You ask a question</span>
-                </div>
-                <div class="step-pill">
-                    <span class="step-num">02</span>
-                    <span class="step-text">FAISS finds relevant text</span>
-                </div>
-                <div class="step-pill">
-                    <span class="step-num">03</span>
-                    <span class="step-text">Gemini generates the answer</span>
-                </div>
-            </section>
-            
-            <!-- Query Form Area -->
-            <section class="query-box" aria-label="Ask a question">
-                <form id="query-form" class="query-form">
-                    <label for="question-input" class="q-label">Your Question</label>
-                    <div class="input-wrapper">
-                        <input 
-                            type="text" 
-                            id="question-input" 
-                            name="question" 
-                            placeholder="e.g. What are the hostel rules? When is the last date to apply?" 
-                            required
-                            autocomplete="off"
-                        >
+
+    <!-- Animated Background Canvas -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Floating Orbs -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <div class="app-shell">
+
+        <!-- ── Sidebar ──────────────────────────────────────── -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                            <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                            <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                        </svg>
                     </div>
-                    <button type="submit" id="ask-btn" class="ask-btn">
-                        <span>Ask</span>
-                        <span class="btn-arrow">→</span>
-                    </button>
-                </form>
-            </section>
-            
-            <!-- Dynamic Result Area -->
-            <section id="result-section" class="result-section" aria-live="polite">
-                <!-- Loader (hidden by default) -->
-                <div id="loader" class="loader hidden">
-                    <div class="spinner-container">
-                        <div class="pulse-ring"></div>
-                        <div class="pulse-ring delay-1"></div>
-                        <div class="spinner-core"></div>
+                    <span class="logo-text">UniQuery</span>
+                </div>
+                <button class="sidebar-close" id="sidebar-close" aria-label="Close sidebar">✕</button>
+            </div>
+
+            <div class="sidebar-section">
+                <p class="sidebar-label">AI Technology</p>
+                <div class="tech-badge">
+                    <span class="tech-dot gemini-dot"></span>
+                    <span>Google Gemini 2.5</span>
+                </div>
+                <div class="tech-badge">
+                    <span class="tech-dot faiss-dot"></span>
+                    <span>FAISS Vector Search</span>
+                </div>
+                <div class="tech-badge">
+                    <span class="tech-dot rag-dot"></span>
+                    <span>RAG Architecture</span>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <p class="sidebar-label">Quick Topics</p>
+                <div class="sidebar-chips">
+                    <button class="sidebar-chip" data-q="What are the admission requirements?">🎓 Admissions</button>
+                    <button class="sidebar-chip" data-q="What are the fee structure and payment deadlines?">💰 Fees</button>
+                    <button class="sidebar-chip" data-q="When are the upcoming exam dates?">📅 Exam Dates</button>
+                    <button class="sidebar-chip" data-q="What are the hostel rules and regulations?">🏠 Hostel Rules</button>
+                    <button class="sidebar-chip" data-q="What are the library timings and rules?">📚 Library</button>
+                    <button class="sidebar-chip" data-q="What placement opportunities are available?">💼 Placements</button>
+                    <button class="sidebar-chip" data-q="What scholarships are available for students?">🏆 Scholarships</button>
+                    <button class="sidebar-chip" data-q="What is the syllabus for the courses?">📖 Syllabus</button>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <p class="sidebar-label">Session Stats</p>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-value" id="stat-questions">0</span>
+                        <span class="stat-label">Questions</span>
                     </div>
-                    <p class="loader-text">Searching documents and generating answer…</p>
-                    <div class="skeleton-container">
-                        <div class="skeleton-line skeleton-title"></div>
-                        <div class="skeleton-line skeleton-body-1"></div>
-                        <div class="skeleton-line skeleton-body-2"></div>
-                        <div class="skeleton-line skeleton-body-3"></div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="stat-chunks">0</span>
+                        <span class="stat-label">Docs Retrieved</span>
                     </div>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <p>Built with Flask · FAISS · Gemini</p>
+            </div>
+        </aside>
+
+        <!-- ── Main Content ─────────────────────────────────── -->
+        <div class="main-wrapper">
+
+            <!-- Top Nav Bar -->
+            <nav class="top-nav">
+                <button class="menu-btn" id="menu-btn" aria-label="Open sidebar">
+                    <span></span><span></span><span></span>
+                </button>
+                <div class="nav-center">
+                    <div class="logo logo-sm">
+                        <div class="logo-icon">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                                <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                                <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <span class="logo-text">UniQuery</span>
+                    </div>
+                </div>
+                <div class="nav-status">
+                    <span class="status-dot"></span>
+                    <span class="status-text">AI Ready</span>
+                </div>
+            </nav>
+
+            <main class="main-content">
+
+                <!-- ── Hero ─────────────────────────────────── -->
+                <header class="hero" id="hero-section">
+                    <div class="hero-badge">
+                        <span class="hero-badge-dot"></span>
+                        RAG-Powered · Real-Time Answers
+                    </div>
+                    <h1 class="hero-title">
+                        Ask Your <span class="gradient-text">University</span><br>
+                        Anything, Instantly
+                    </h1>
+                    <p class="hero-desc">
+                        Powered by AI and your official university documents. Get accurate answers
+                        about admissions, fees, exams, hostel, library, placements, and more.
+                    </p>
+
+                    <!-- How It Works Pills -->
+                    <div class="steps-row">
+                        <div class="step-pill">
+                            <span class="step-icon">✏️</span>
+                            <span class="step-num">01</span>
+                            <span class="step-text">You ask a question</span>
+                        </div>
+                        <div class="step-arrow">→</div>
+                        <div class="step-pill">
+                            <span class="step-icon">🔍</span>
+                            <span class="step-num">02</span>
+                            <span class="step-text">FAISS finds relevant text</span>
+                        </div>
+                        <div class="step-arrow">→</div>
+                        <div class="step-pill">
+                            <span class="step-icon">✨</span>
+                            <span class="step-num">03</span>
+                            <span class="step-text">Gemini generates answer</span>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- ── Suggestion Chips ─────────────────────── -->
+                <section class="suggestions-section" aria-label="Suggested questions">
+                    <p class="suggestions-label">💡 Try asking about:</p>
+                    <div class="chips-row" id="chips-row">
+                        <button class="chip" data-q="What are the admission requirements and deadlines?">Admissions</button>
+                        <button class="chip" data-q="What is the total fee structure?">Fee Structure</button>
+                        <button class="chip" data-q="When are the upcoming exams?">Exam Dates</button>
+                        <button class="chip" data-q="What are the hostel rules?">Hostel Rules</button>
+                        <button class="chip" data-q="What are the library timings?">Library Hours</button>
+                        <button class="chip" data-q="What scholarships are available?">Scholarships</button>
+                        <button class="chip" data-q="Tell me about placement opportunities">Placements</button>
+                    </div>
+                </section>
+
+                <!-- ── Query Input ──────────────────────────── -->
+                <section class="query-section" aria-label="Ask a question">
+                    <form id="query-form" class="query-form" autocomplete="off">
+                        <div class="input-area">
+                            <div class="input-container" id="input-container">
+                                <div class="input-prefix">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                                    </svg>
+                                </div>
+                                <input
+                                    type="text"
+                                    id="question-input"
+                                    name="question"
+                                    placeholder="Ask anything about your university…"
+                                    required
+                                    maxlength="500"
+                                >
+                                <div class="char-counter" id="char-counter">0 / 500</div>
+                            </div>
+                            <button type="submit" id="ask-btn" class="ask-btn">
+                                <span class="ask-btn-text">Ask AI</span>
+                                <span class="ask-btn-icon">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                                    </svg>
+                                </span>
+                            </button>
+                        </div>
+                        <div class="input-hint">Press <kbd>Enter</kbd> to submit · <kbd>Shift+Enter</kbd> for new line</div>
+                    </form>
+                </section>
+
+                <!-- ── Chat History ─────────────────────────── -->
+                <section id="chat-history" class="chat-history" aria-live="polite">
+                    <!-- Messages will be dynamically inserted here -->
+                </section>
+
+                <!-- ── Empty State ──────────────────────────── -->
+                <div class="empty-state" id="empty-state">
+                    <div class="empty-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        </svg>
+                    </div>
+                    <p class="empty-title">Start a Conversation</p>
+                    <p class="empty-desc">Ask any question about your university and get AI-powered answers from official documents.</p>
                 </div>
 
-                <!-- Error Container (hidden by default) -->
-                <div id="error-card" class="error-card hidden">
-                    <span class="error-icon">⚠️</span>
-                    <span id="error-message" class="error-message"></span>
-                </div>
+            </main>
 
-                <!-- Answer Container (hidden by default) -->
-                <div id="answer-card" class="answer-card hidden">
-                    <div class="answer-label">Answer</div>
-                    <div id="answer-content" class="answer-content"></div>
-                </div>
-
-                <!-- Source Chunks Container (hidden by default) -->
-                <div id="sources-container" class="sources-container hidden">
-                    <button id="sources-toggle" class="sources-toggle" aria-expanded="false" aria-controls="sources-content">
-                        <span class="toggle-icon">📄</span>
-                        <span class="toggle-text">Source chunks retrieved from documents</span>
-                        <span class="chevron">▼</span>
-                    </button>
-                    <div id="sources-content" class="sources-content hidden">
-                        <div id="sources-list" class="sources-list"></div>
-                    </div>
-                </div>
-            </section>
-        </main>
-        
-        <!-- Footer -->
-        <footer class="app-footer">
-            <p>UniQuery &copy; 2026. Built with Flask, FAISS, and Gemini API.</p>
-        </footer>
+            <footer class="app-footer">
+                <p>UniQuery &copy; 2026 &nbsp;·&nbsp; Built with Flask, FAISS &amp; Google Gemini API &nbsp;·&nbsp; All answers sourced from official university documents</p>
+            </footer>
+        </div>
     </div>
 
-    <!-- JavaScript File -->
+    <!-- Overlay for mobile sidebar -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- JavaScript -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>
