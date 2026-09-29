@@ -4,33 +4,19 @@ services:
     runtime: python
     region: oregon
     plan: free
-<<<<<<< HEAD
 
-    # ── Build: install deps + pre-cache the ML model ──────────────────────────
+    # Install dependencies + pre-download ML model at build time
     buildCommand: pip install -r requirements.txt && python download_model.py
 
-    # ── Start: run Gunicorn with 1 worker to stay within 512MB free tier RAM ──
+    # Start Gunicorn with 1 worker (fits within 512MB free tier RAM)
     startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --timeout 120
 
-    # ── Health check: Render pings this to know when the app is ready ─────────
+    # Render pings /health to confirm app is ready before routing traffic
     healthCheckPath: /health
 
-    # ── Environment Variables ─────────────────────────────────────────────────
     envVars:
       - key: GEMINI_API_KEY
-        sync: false          # Paste your real key manually in the Render dashboard
+        sync: false       # Paste your real Gemini API key in Render dashboard manually
 
       - key: PYTHON_VERSION
         value: 3.11.0
-
-      - key: PORT
-        value: 10000
-=======
-    buildCommand: pip install -r requirements.txt && python download_model.py
-    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --timeout 120
-    envVars:
-      - key: GEMINI_API_KEY
-        sync: false          # You will paste this manually in the Render dashboard
-      - key: PYTHON_VERSION
-        value: 3.11.0
->>>>>>> ec10293b4bb1b8b873a732d3a65d0fbe0753e70d
