@@ -4,6 +4,7 @@ services:
     runtime: python
     region: oregon
     plan: free
+<<<<<<< HEAD
 
     # ── Build: install deps + pre-cache the ML model ──────────────────────────
     buildCommand: pip install -r requirements.txt && python download_model.py
@@ -24,3 +25,12 @@ services:
 
       - key: PORT
         value: 10000
+=======
+    buildCommand: pip install -r requirements.txt && python download_model.py
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --timeout 120
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false          # You will paste this manually in the Render dashboard
+      - key: PYTHON_VERSION
+        value: 3.11.0
+>>>>>>> ec10293b4bb1b8b873a732d3a65d0fbe0753e70d
