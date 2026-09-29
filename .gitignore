@@ -1,29 +1,30 @@
-# ── Secrets ────────────────────────────────────────────────────────────────
+# ── Secrets (NEVER commit real API keys) ───────────────────────────────────
 .env
 
-# ── Python cache ───────────────────────────────────────────────────────────
+# ── Python cache ────────────────────────────────────────────────────────────
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 
-# ── Virtual environments ────────────────────────────────────────────────────
+# ── Virtual environments ─────────────────────────────────────────────────────
 venv/
 .venv/
 env/
 
-# ── Local model cache (downloaded at build time on Render) ─────────────────
+# ── Local ML model cache (downloaded at build time on Render) ────────────────
+# Do NOT commit this — it's large (~90MB) and Render re-downloads it during build
 models/
 
-# ── Editor / IDE ────────────────────────────────────────────────────────────
+# ── Editor / IDE ─────────────────────────────────────────────────────────────
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# ── OS files ────────────────────────────────────────────────────────────────
+# ── OS files ─────────────────────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
 
-# ── Legacy Streamlit config (unused) ────────────────────────────────────────
+# ── Legacy Streamlit config (unused) ─────────────────────────────────────────
 .streamlit/
